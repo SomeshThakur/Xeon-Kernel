@@ -908,9 +908,8 @@ static int ap3426_ps_enable(struct ap3426_data *ps_data, int enable)
 		if (distance != 1) {
 			PS_ERR("Unexpected distance:%d upon enable\n", distance);
 		}
-		input_report_abs(ps_data->psensor_input_dev, ABS_DISTANCE, 1);
-		input_sync(ps_data->psensor_input_dev);
-		__pm_wakeup_event(&ps_data->ps_ws, 2*HZ);
+		ap3426_report_abs_ts(ps_data->psensor_input_dev, ABS_DISTANCE, 1);
+		wake_lock_timeout(&ps_data->ps_wakelock, 2*HZ);
 		pxvalue = ap3426_get_px_value(client);
 		PS_DBG("pxvalue:%d, distance:%d\n", pxvalue, distance);
 
@@ -2593,9 +2592,8 @@ static irqreturn_t ap3426_threaded_isr(int irq, void *client_data)
 		/* We have a PS Interrupt */
 		if (misc_ps_opened) {
 			distance = ap3426_get_object(data->client);
-			input_report_abs(data->psensor_input_dev, ABS_DISTANCE, distance);
-			input_sync(data->psensor_input_dev);
-			__pm_wakeup_event(&data->ps_ws, 2*HZ);
+			ap3426_report_abs_ts(data->psensor_input_dev, ABS_DISTANCE, distance);
+			wake_lock_timeout(&data->ps_wakelock, 2*HZ);
 		}
 	}
 
