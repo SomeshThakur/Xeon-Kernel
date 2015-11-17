@@ -1594,6 +1594,13 @@ static int ap3426_ps_enable_set(struct sensors_classdev *sensors_cdev,
 
 	ap3426_lock_mutex(ps_data);
 
+	err = ap3426_ps_enable(ps_data, enabled);
+
+	if (err < 0) {
+		rv = err;
+		goto out_unlock;
+	}
+
 #ifdef DI_AUTO_CAL
 	if (enabled == 1 && !ps_data->ps_calibrated) {
 		struct i2c_client *client = ps_data->client;
@@ -1613,11 +1620,8 @@ static int ap3426_ps_enable_set(struct sensors_classdev *sensors_cdev,
 		ap3426_enable_ps_interrupts(client);
 	}
 #endif
-	err = ap3426_ps_enable(ps_data, enabled);
 
-	if (err < 0)
-		rv = err;
-
+out_unlock:
 	ap3426_unlock_mutex(ps_data);
 
 	PS_RETURN("rv:%d", rv);
@@ -2422,7 +2426,7 @@ static int ap3426_init_client(struct i2c_client *client)
 	buf[2] = 0xFF;
 	buf[3] = 0XFF;
 
-	rv = i2c_smbus_write_block_data(client, AP3426_REG_ALS_THDL_L, 4, buf);
+	rv = i2c_smbus_write_i2c_block_data(client, AP3426_REG_ALS_THDL_L, 4, buf);
 	if (rv) {
 		dev_err(&client->dev, "error writing ALS config: %d\n", rv);
 		goto done;
@@ -2443,7 +2447,7 @@ static int ap3426_init_client(struct i2c_client *client)
 	buf[4] = data->ps_thd_h & 0xff;
 	buf[5] = data->ps_thd_h >> 8;
 
-	rv = i2c_smbus_write_block_data(client, AP3426_REG_PS_CAL_L, 6, buf);
+	rv = i2c_smbus_write_i2c_block_data(client, AP3426_REG_PS_CAL_L, 6, buf);
 	if (rv) {
 		dev_err(&client->dev, "error writing ALS config: %d\n", rv);
 		goto done;
@@ -3132,9 +3136,6 @@ static int ap3426_resume(struct device *dev)
 	struct ap3426_data *ps_data = dev_get_drvdata(dev);
 	int rc;
 	bool retry = true;
-
-	if (!allow_suspend)
-		return 0;
 
 	ENTRY("dev:%p)", dev);
 
