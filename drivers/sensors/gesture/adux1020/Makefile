@@ -1,2 +1,0 @@
-
-obj-$(CONFIG_YL_ADUX1020_GESTURE) += adux1020.o

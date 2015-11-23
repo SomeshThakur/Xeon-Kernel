@@ -1,7 +1,0 @@
-
-config YL_CM36682_ALSPROX
-	tristate "CM36682 ALS&Proximity Support"
-	depends on I2C=y
-	help
-	  cm36682 ALS&Proximity Driver
-	  

@@ -1,7 +1,0 @@
-
-config YL_AKM8975_COMPASS
-	tristate "akm8975 Compass Support"
-    depends on I2C
-    default n
-	help
-	  akm8975 Compass Driver

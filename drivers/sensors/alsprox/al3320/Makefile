@@ -1,2 +1,0 @@
-
-obj-$(CONFIG_YL_AL3320_ALSPROX) += al3320.o
